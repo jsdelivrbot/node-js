@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <head>
+        <title> testing.... </title>
+    </head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/addons/p5.dom.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #contenu {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+    <script>
+        // go me hacker 
+        var username = prompt("Username : ");
+        var socket = io();
+        var id = '';
+        socket.on('id', (data) => {
+            id = data.id;
+            console.log(data.mouses);
+
+            for (var i = 0; i < data.mouses.length; i++) {
+                var alreadyIn = false;
+                for (var j = 0; j < mouses.length; j++) {
+                    if (mouses[j].id === data.mouses[i].id && data.mouses[i].id != id) {
+                        alreadyIn = true;
+                    }
+                }
+
+                if (!alreadyIn) {
+                    mouses.push(new Mouse(10, 10, data.mouses[i].username, data.mouses[i].id));
+                }
+            }
+        })
+
+        if (username === " ") {
+            username = id;
+        }
+
+        console.log(username);
+        socket.emit('newClient', username);
+        var objects = [];
+        var mouses = [];
+        var img;
+        var type = 'rect';
+        var allTypes = ['rect', 'ellipse'];
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            rectMode(CENTER);
+            ellipseMode(CENTER);
+
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+        socket.on('obj', (obj) => {
+            objects.push(new Object(obj.x, obj.y, obj.type));
+        });
+
+        function mouseWheel(event) {
+            var initialType = type;
+            while (initialType === type) {
+                type = allTypes[int(random(allTypes.length))];
+            }
+        }
+        var clientNbr = 1;
+        socket.on('clientNbr', (nbr) => clientNbr = nbr);
+
+        socket.on('newClient', (data) => mouses.push(new Mouse(10, 10, data.username, data.id)));
+
+        socket.on('mousePos', (pos) => {
+            for (var i = 0; i < mouses.length; i++) {
+                if (pos.id === mouses[i].id) {
+                    mouses[i].x = pos.x;
+                    mouses[i].y = pos.y;
+                }
+            }
+        });
+
+        socket.on('otherDisconnect', (id) => {
+          console.log("disconnect : " + id)
+            for (var i = 0; i < mouses.length; i++) {
+                if (mouses[i].id === id) {
+                    mouses.splice(i, 1);
+                }
+            }
+        })
+        setInterval(() => {
+            objects.splice(0, 1);
+        }, 17);
+
+        function draw() {
+            // if (clientNbr === 1) background(255)
+            background(255);
+            text("FPS : " + int(frameRate()) + "\n Users : " + clientNbr, 50, 50);
+            socket.emit('mousePos', {
+                x: mouseX,
+                y: mouseY,
+                username: username,
+                id: id
+            });
+            stroke(100);
+            if (mouseIsPressed) {
+
+                fill(255);
+                var obj = new Object(mouseX, mouseY, type);
+                socket.emit('obj', obj)
+                objects.push(obj);
+
+            }
+
+            for (var i = 0; i < objects.length; i++) {
+                objects[i].show();
+                if (i === 0) {
+                    objects[i].fill = [220, 255, 250];
+                }
+            }
+
+
+            for (var i = 0; i < mouses.length; i++) {
+                mouses[i].show();
+            }
+
+
+
+        }
+
+        function Object(x_, y_, type_) {
+            this.x = x_;
+            this.y = y_;
+            this.type = type_;
+            this.size = 50;
+            this.fill = [255, 255, 255];
+            this.show = function() {
+                fill(this.fill[0], this.fill[1], this.fill[2]);
+                if (this.type === "rect") rect(this.x, this.y, this.size, this.size);
+                if (this.type === "ellipse") ellipse(this.x, this.y, this.size, this.size);
+
+            }
+        }
+
+        function Mouse(x_, y_, username_, id_) {
+            this.x = x_;
+            this.y = y_;
+            this.username = username_;
+            this.id = id_;
+            this.show = function() {
+                fill(255);
+                triangle(this.x + 0, this.y + 0, this.x + 20, this.y + 20, this.x + 0, this.y + 20);
+                fill(0);
+                text(String(this.username), this.x + 40, this.y);
+            }
+        }
+    </script>
+</body>
+
+</html>
