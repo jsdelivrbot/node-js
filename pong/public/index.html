@@ -1,0 +1,39 @@
+<!DOCTYPE html> 
+<html>
+  <head> 
+     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+     <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/addons/p5.dom.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://pastebin.com/raw/RnkCKAc0"></script>
+   <script src="https://unpkg.com/vue/dist/vue.js"></script>
+   <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+   <script v-if="test" src="sketch.js"> </script>
+
+    <div id="app"> 
+              <div class="text-xs-center">
+              <h1> PONG </h1>
+              <v-btn > SOLO vs BOT</v-btn> <br>
+              <v-btn onclick="search()"> MULTIPLAYER</v-btn> <br>
+              <v-btn> ME DONNER 500 EUROS </v-btn>
+              </div>
+     </div>
+
+  </body>
+
+  <script>
+ 
+  	var app = new Vue({
+	  el: '#app',
+	  data: {
+ 	  	test : true
+	  }
+  })
+
+
+  </script>
+</html>
