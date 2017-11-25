@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+  <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title> Ave-25 </title>
+</head>
+  <body>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+     <div id="root">   
+      <v-app> 
+        <v-content>
+          <br>  <br>
+     <v-toolbar color="blue accent-4" dark fixed app>
+      <span> </span>
+      <v-toolbar-title class="text-xs-center">Ave-25</v-toolbar-title>
+    </v-toolbar>
+      <div id="topicList">
+       <b> SUJET </b>  
+           <div id="topic" v-for="topic in topics">  
+              <b class="type"> {{  topic.type[0].toUpperCase() }} </b>
+              <img v-if="topic.red" src="http://www.jeuxvideo.com/img/forums/topic-dossier2.png" height="25"  width="25"> 
+              <img v-if="!topic.red" src="http://www.jeuxvideo.com/img/forums/topic-dossier1.png" height="25"  width="25"> 
+              <a v-if="topic.type === 'jvc'" class="topic" v-bind:href="topic.href">     {{  topic.name  }} ({{ topic.count}}) </a>
+              <a v-if="topic.type === 'ave'" class="topic" v-bind:href="topic.href">     {{  topic.name  }}   </a>
+        </div>
+      </div>
+    </v-content>
+    </div>
+    <v-app>
+<style>
+  span {
+    background-color: grey;
+    position: absolute;
+  }
+  .type {
+    position: absolute;
+    left: 7px;
+    margin-top: 4px;
+    color: white;
+     text-shadow: 0.5px 0.5px 0.5px #0f0f0f;
+   
+  }
+
+  @media (min-width: 650px) { 
+    #topicList{
+        position: absolute;
+        left: 25%;
+        border-width: 1px;
+        border-style: solid;
+      }
+  }
+
+  @media (max-width: 650px) { 
+    #topicList{
+      }
+  }
+
+ 
+ a:hover { 
+    color: orange;
+}
+}
+
+
+  #topic {
+  }
+  .topic {
+    color: #006BD7;
+    text-decoration: none;
+    font-weight: 900;
+
+
+  }
+</style>
+    <script>
+
+     class Topic{
+      constructor(name, count, type, author){
+        this.href = "";
+        console.log(this.href);
+        this.name = name;
+        this.count = count;
+        this.author = author;
+        if (this.count >= 20) {
+          this.red = true;
+        }
+        else if (this.count < 20) {
+          this.red = false;
+        }
+        this.type = type;
+      }
+     }
+
+    var app = new Vue({
+     
+      el: '#root',
+      data: {
+          topics : [],
+          live : true
+      },
+      methods: {
+          ok() {
+            alert();
+          },
+          data () {
+              return {
+                  enabled: false
+              }
+          }        
+      }
+    })      
+
+      var socket = io();
+      socket.on('resetTopic', () => {
+        for (var i = 0; i < app.topics.length; i++) {
+          app.topics.splice(i, 1);
+        }
+
+      })
+      socket.on('topic', (data) =>  {
+        console.log(data.type);
+        topic = new Topic(data.topicName, data.topicCount, data.type, data.topicAuthor);
+        if (data.type === "ave"){
+          topic.href = data.topicHref;
+         }
+        else if (data.type === "jvc") {
+          topic.href = "https://www.jeuxvideo.com"+data.topicHref;
+        }
+
+
+        app.topics.push(topic);
+
+      })
+  
+    </script>
+  </body>
+</html>
